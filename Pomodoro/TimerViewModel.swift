@@ -32,13 +32,19 @@ final class TimerViewModel: ObservableObject {
         return String(format: "%02d:%02d", minutes, seconds)
     }
 
-    init() {}
+    init() {
+        NotificationService.requestPermission()
+    }
 
     func startWork() {
         let endTime = Date().addingTimeInterval(Self.workDuration)
         state = .working(endTime: endTime)
         remainingSeconds = Self.workDuration
         startTimer(endTime: endTime)
+
+        ShortcutService.triggerStartShortcut()
+        NotificationService.scheduleWorkComplete(at: endTime)
+        LiveActivityService.startWorkSession(endTime: endTime)
     }
 
     func startBreak() {
@@ -46,6 +52,9 @@ final class TimerViewModel: ObservableObject {
         state = .onBreak(endTime: endTime)
         remainingSeconds = Self.breakDuration
         startTimer(endTime: endTime)
+
+        NotificationService.scheduleBreakComplete(at: endTime)
+        LiveActivityService.startBreakSession(endTime: endTime)
     }
 
     func startNewSession() {
@@ -56,6 +65,9 @@ final class TimerViewModel: ObservableObject {
         stopTimer()
         state = .idle
         remainingSeconds = Self.workDuration
+
+        NotificationService.cancelAll()
+        LiveActivityService.stop()
     }
 
     private func startTimer(endTime: Date) {
@@ -99,11 +111,14 @@ final class TimerViewModel: ObservableObject {
 
     private func workDidComplete() {
         state = .workComplete
+        ShortcutService.triggerEndShortcut()
+        LiveActivityService.stop()
     }
 
     private func breakDidComplete() {
         state = .idle
         remainingSeconds = Self.workDuration
+        LiveActivityService.stop()
     }
 
     private func triggerHapticFeedback() {
