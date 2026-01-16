@@ -1,15 +1,20 @@
 import UIKit
 
 enum ShortcutService {
+    private static let callbackURL = "pomodoro://"
+
     static func triggerStartShortcut() {
-        guard let url = URL(string: "shortcuts://run-shortcut?name=Pomodoro%20Start") else {
-            return
-        }
-        UIApplication.shared.open(url) { _ in }
+        triggerShortcut(named: "Pomodoro Start")
     }
 
     static func triggerEndShortcut() {
-        guard let url = URL(string: "shortcuts://run-shortcut?name=Pomodoro%20End") else {
+        triggerShortcut(named: "Pomodoro End")
+    }
+
+    private static func triggerShortcut(named name: String) {
+        guard let encodedName = name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let encodedCallback = callbackURL.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "shortcuts://x-callback-url/run-shortcut?name=\(encodedName)&x-success=\(encodedCallback)") else {
             return
         }
         UIApplication.shared.open(url) { _ in }
