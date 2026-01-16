@@ -3,7 +3,7 @@ import Foundation
 
 @MainActor
 enum LiveActivityService {
-    private static var currentActivity: Activity<PomodoroActivityAttributes>?
+    private static var currentActivity: Activity<PomodoroWidgetAttributes>?
 
     static func startWorkSession(endTime: Date) {
         stop()
@@ -13,8 +13,8 @@ enum LiveActivityService {
             return
         }
 
-        let attributes = PomodoroActivityAttributes(startTime: Date())
-        let state = PomodoroActivityAttributes.ContentState(isBreak: false, endTime: endTime)
+        let attributes = PomodoroWidgetAttributes(startTime: Date())
+        let state = PomodoroWidgetAttributes.ContentState(isBreak: false, endTime: endTime)
 
         do {
             currentActivity = try Activity.request(
@@ -35,8 +35,8 @@ enum LiveActivityService {
             return
         }
 
-        let attributes = PomodoroActivityAttributes(startTime: Date())
-        let state = PomodoroActivityAttributes.ContentState(isBreak: true, endTime: endTime)
+        let attributes = PomodoroWidgetAttributes(startTime: Date())
+        let state = PomodoroWidgetAttributes.ContentState(isBreak: true, endTime: endTime)
 
         do {
             currentActivity = try Activity.request(
@@ -57,7 +57,7 @@ enum LiveActivityService {
     }
 
     static func update(isBreak: Bool, endTime: Date) {
-        let state = PomodoroActivityAttributes.ContentState(isBreak: isBreak, endTime: endTime)
+        let state = PomodoroWidgetAttributes.ContentState(isBreak: isBreak, endTime: endTime)
         Task {
             await currentActivity?.update(.init(state: state, staleDate: endTime))
         }

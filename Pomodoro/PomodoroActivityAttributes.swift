@@ -1,14 +1,12 @@
 import ActivityKit
 import Foundation
 
-// NOTE: This file must be added to both the main app target and the widget target
-// to share the ActivityAttributes between them.
-
-struct PomodoroActivityAttributes: ActivityAttributes {
-    struct ContentState: Codable, Hashable {
-        let isBreak: Bool
-        let endTime: Date
+// Must match PomodoroWidgetAttributes in widget extension exactly
+struct PomodoroWidgetAttributes: ActivityAttributes {
+    public struct ContentState: Codable, Hashable {
+        var isBreak: Bool
+        var endTime: Date
     }
 
-    let startTime: Date
+    var startTime: Date
 }
