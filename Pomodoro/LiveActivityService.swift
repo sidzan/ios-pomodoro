@@ -8,7 +8,10 @@ enum LiveActivityService {
     static func startWorkSession(endTime: Date) {
         stop()
 
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+            print("⚠️ Live Activities not enabled")
+            return
+        }
 
         let attributes = PomodoroActivityAttributes(startTime: Date())
         let state = PomodoroActivityAttributes.ContentState(isBreak: false, endTime: endTime)
@@ -18,15 +21,19 @@ enum LiveActivityService {
                 attributes: attributes,
                 content: .init(state: state, staleDate: endTime)
             )
+            print("✅ Live Activity started: \(currentActivity?.id ?? "unknown")")
         } catch {
-            // Fail silently
+            print("❌ Failed to start Live Activity: \(error)")
         }
     }
 
     static func startBreakSession(endTime: Date) {
         stop()
 
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+            print("⚠️ Live Activities not enabled")
+            return
+        }
 
         let attributes = PomodoroActivityAttributes(startTime: Date())
         let state = PomodoroActivityAttributes.ContentState(isBreak: true, endTime: endTime)
@@ -36,8 +43,9 @@ enum LiveActivityService {
                 attributes: attributes,
                 content: .init(state: state, staleDate: endTime)
             )
+            print("✅ Break Live Activity started: \(currentActivity?.id ?? "unknown")")
         } catch {
-            // Fail silently
+            print("❌ Failed to start Break Live Activity: \(error)")
         }
     }
 
