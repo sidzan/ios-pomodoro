@@ -8,17 +8,108 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var viewModel = TimerViewModel()
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        ZStack {
+            PomodoroTheme.background(for: colorScheme)
+                .ignoresSafeArea()
+
+            VStack {
+                Spacer()
+                timerDisplay
+                Spacer()
+                actionButtons
+            }
+            .padding(.bottom, 60)
         }
-        .padding()
+    }
+
+    private var timerDisplay: some View {
+        ZStack {
+            TimerRingView(
+                progress: viewModel.progress,
+                isBreak: viewModel.state.isOnBreak
+            )
+
+            VStack(spacing: 8) {
+                Text(viewModel.formattedTime)
+                    .font(.system(size: PomodoroTheme.timerFontSize, weight: .ultraLight, design: .default))
+                    .monospacedDigit()
+                    .foregroundColor(PomodoroTheme.text(for: colorScheme))
+
+                Text(viewModel.state.statusText.uppercased())
+                    .font(.system(size: 14, weight: .medium))
+                    .tracking(2)
+                    .foregroundColor(PomodoroTheme.text(for: colorScheme).opacity(0.6))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var actionButtons: some View {
+        switch viewModel.state {
+        case .idle:
+            ActionButton(
+                title: "Start",
+                color: PomodoroTheme.workRing,
+                action: viewModel.startWork
+            )
+        case .working, .onBreak:
+            ActionButton(
+                title: "Stop",
+                color: PomodoroTheme.ringTrack(for: colorScheme),
+                action: viewModel.reset
+            )
+        case .workComplete:
+            HStack(spacing: 16) {
+                ActionButton(
+                    title: "Break",
+                    color: PomodoroTheme.breakRing,
+                    action: viewModel.startBreak
+                )
+                ActionButton(
+                    title: "Again",
+                    color: PomodoroTheme.workRing,
+                    action: viewModel.startNewSession
+                )
+            }
+        }
+    }
+}
+
+private struct ActionButton: View {
+    let title: String
+    let color: Color
+    let action: () -> Void
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundColor(buttonTextColor)
+                .frame(width: 160, height: 54)
+                .background(color)
+                .cornerRadius(27)
+        }
+    }
+
+    private var buttonTextColor: Color {
+        if color == PomodoroTheme.ringTrackLight || color == PomodoroTheme.ringTrackDark {
+            return PomodoroTheme.text(for: colorScheme)
+        }
+        return .white
     }
 }
 
 #Preview {
     ContentView()
+}
+
+#Preview("Dark Mode") {
+    ContentView()
+        .preferredColorScheme(.dark)
 }
