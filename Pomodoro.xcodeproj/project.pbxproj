@@ -52,13 +52,6 @@
 			);
 			target = E75B681A2F1A2E7D0068282F /* PomodoroWidgetExtension */;
 		};
-		E75B68642F1A315B0068282F /* Exceptions for "Pomodoro" folder in "PomodoroWidgetExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				PomodoroActivityAttributes.swift,
-			);
-			target = E75B681A2F1A2E7D0068282F /* PomodoroWidgetExtension */;
-		};
 		E75B68682F1A328B0068282F /* Exceptions for "Pomodoro" folder in "Pomodoro" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -73,7 +66,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				E75B68682F1A328B0068282F /* Exceptions for "Pomodoro" folder in "Pomodoro" target */,
-				E75B68642F1A315B0068282F /* Exceptions for "Pomodoro" folder in "PomodoroWidgetExtension" target */,
 			);
 			path = Pomodoro;
 			sourceTree = "<group>";
