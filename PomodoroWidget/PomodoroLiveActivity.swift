@@ -21,7 +21,7 @@ struct PomodoroLiveActivity: Widget {
                             .font(.headline)
                             .foregroundColor(context.state.isBreak ? .green : .red)
 
-                        Text(timerInterval: context.attributes.startTime...context.state.endTime, countsDown: true)
+                        Text(timerInterval: Date.now...context.state.endTime, countsDown: true)
                             .font(.system(size: 32, weight: .light))
                             .monospacedDigit()
                     }
@@ -30,7 +30,7 @@ struct PomodoroLiveActivity: Widget {
                 Image(systemName: context.state.isBreak ? "leaf.fill" : "timer")
                     .foregroundColor(context.state.isBreak ? .green : .red)
             } compactTrailing: {
-                Text(timerInterval: context.attributes.startTime...context.state.endTime, countsDown: true)
+                Text(timerInterval: Date.now...context.state.endTime, countsDown: true)
                     .monospacedDigit()
                     .frame(width: 50)
             } minimal: {
@@ -55,7 +55,7 @@ private struct LockScreenView: View {
                     .font(.headline)
                     .foregroundColor(context.state.isBreak ? .green : .red)
 
-                Text(timerInterval: context.attributes.startTime...context.state.endTime, countsDown: true)
+                Text(timerInterval: Date.now...context.state.endTime, countsDown: true)
                     .font(.system(size: 28, weight: .light))
                     .monospacedDigit()
             }
@@ -63,5 +63,6 @@ private struct LockScreenView: View {
             Spacer()
         }
         .padding()
+        .activityBackgroundTint(context.state.isBreak ? .green.opacity(0.2) : .red.opacity(0.2))
     }
 }
