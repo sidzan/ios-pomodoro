@@ -13,6 +13,7 @@ enum NotificationService {
         content.title = "Work Session Complete!"
         content.body = "Great job! Time for a break."
         content.sound = .default
+        content.interruptionLevel = .timeSensitive
 
         let trigger = UNTimeIntervalNotificationTrigger(
             timeInterval: max(1, date.timeIntervalSinceNow),
@@ -33,6 +34,7 @@ enum NotificationService {
         content.title = "Break Over!"
         content.body = "Ready to focus again?"
         content.sound = .default
+        content.interruptionLevel = .timeSensitive
 
         let trigger = UNTimeIntervalNotificationTrigger(
             timeInterval: max(1, date.timeIntervalSinceNow),
