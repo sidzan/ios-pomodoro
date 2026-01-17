@@ -16,7 +16,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "E75B681A2F1A2E7D0068282F"
+               BlueprintIdentifier = "E744CC782F1A5B76009A3E1D"
                BuildableName = "PomodoroWidgetExtension.appex"
                BlueprintName = "PomodoroWidgetExtension"
                ReferencedContainer = "container:Pomodoro.xcodeproj">
@@ -57,8 +57,18 @@
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
       launchAutomaticallySubstyle = "2">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <RemoteRunnable
+         runnableDebuggingMode = "2"
+         BundleIdentifier = "com.apple.springboard">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "E744CC782F1A5B76009A3E1D"
+            BuildableName = "PomodoroWidgetExtension.appex"
+            BlueprintName = "PomodoroWidgetExtension"
+            ReferencedContainer = "container:Pomodoro.xcodeproj">
+         </BuildableReference>
+      </RemoteRunnable>
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E75B68082F1A25BE0068282F"
@@ -66,7 +76,7 @@
             BlueprintName = "Pomodoro"
             ReferencedContainer = "container:Pomodoro.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "_XCWidgetKind"
