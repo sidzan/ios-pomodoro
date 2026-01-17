@@ -78,7 +78,7 @@
 			path = Pomodoro;
 			sourceTree = "<group>";
 		};
-	/* End PBXFileSystemSynchronizedRootGroup section */
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		E744CC762F1A5B76009A3E1D /* Frameworks */ = {

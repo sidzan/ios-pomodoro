@@ -1,11 +1,22 @@
 import UserNotifications
+import os.log
 
-enum NotificationService {
+private let logger = Logger(subsystem: "com.sijan.pomodoro.Pomodoro", category: "Notifications")
+
+// MARK: - Notification Service
+
+enum NotificationService: NotificationServiceProtocol {
     private static let workCompleteIdentifier = "pomodoro.work.complete"
     private static let breakCompleteIdentifier = "pomodoro.break.complete"
 
     static func requestPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in }
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            if let error = error {
+                logger.error("Failed to request notification permission: \(error.localizedDescription)")
+            } else {
+                logger.info("Notification permission granted: \(granted)")
+            }
+        }
     }
 
     static func scheduleWorkComplete(at date: Date) {
@@ -26,7 +37,13 @@ enum NotificationService {
             trigger: trigger
         )
 
-        UNUserNotificationCenter.current().add(request) { _ in }
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                logger.error("Failed to schedule work notification: \(error.localizedDescription)")
+            } else {
+                logger.info("Work complete notification scheduled for \(date)")
+            }
+        }
     }
 
     static func scheduleBreakComplete(at date: Date) {
@@ -47,10 +64,17 @@ enum NotificationService {
             trigger: trigger
         )
 
-        UNUserNotificationCenter.current().add(request) { _ in }
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                logger.error("Failed to schedule break notification: \(error.localizedDescription)")
+            } else {
+                logger.info("Break complete notification scheduled for \(date)")
+            }
+        }
     }
 
     static func cancelAll() {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        logger.info("All pending notifications cancelled")
     }
 }

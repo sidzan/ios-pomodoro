@@ -2,23 +2,46 @@ import Foundation
 import Combine
 import UIKit
 
+// MARK: - Timer Configuration
+
+struct TimerConfiguration {
+    var workDuration: TimeInterval
+    var breakDuration: TimeInterval
+
+    static let `default` = TimerConfiguration(
+        workDuration: 25 * 60,
+        breakDuration: 5 * 60
+    )
+}
+
+// MARK: - Timer View Model
+
 @MainActor
 final class TimerViewModel: ObservableObject {
-    static let workDuration: TimeInterval = 25 * 60
-    static let breakDuration: TimeInterval = 5 * 60
+    // MARK: - Published State
 
     @Published private(set) var state: TimerState = .idle
-    @Published private(set) var remainingSeconds: TimeInterval = workDuration
+    @Published private(set) var remainingSeconds: TimeInterval
+
+    // MARK: - Configuration
+
+    let configuration: TimerConfiguration
+
+    // MARK: - Private Properties
 
     private var timerCancellable: AnyCancellable?
+    private var sessionStartTime: Date?
+    private var sessionRepository: SessionRepositoryProtocol?
+
+    // MARK: - Computed Properties
 
     var progress: Double {
         let totalDuration: TimeInterval
         switch state {
         case .working:
-            totalDuration = Self.workDuration
+            totalDuration = configuration.workDuration
         case .onBreak:
-            totalDuration = Self.breakDuration
+            totalDuration = configuration.breakDuration
         case .idle, .workComplete:
             return 0
         }
@@ -32,29 +55,38 @@ final class TimerViewModel: ObservableObject {
         return String(format: "%02d:%02d", minutes, seconds)
     }
 
-    init() {
+    // MARK: - Initialization
+
+    init(configuration: TimerConfiguration = .default, sessionRepository: SessionRepositoryProtocol? = nil) {
+        self.configuration = configuration
+        self.remainingSeconds = configuration.workDuration
+        self.sessionRepository = sessionRepository
         NotificationService.requestPermission()
     }
 
+    // MARK: - Public Methods
+
     func startWork() {
-        let endTime = Date().addingTimeInterval(Self.workDuration)
+        sessionStartTime = Date()
+        let endTime = Date().addingTimeInterval(configuration.workDuration)
         state = .working(endTime: endTime)
-        remainingSeconds = Self.workDuration
+        remainingSeconds = configuration.workDuration
         startTimer(endTime: endTime)
 
         ShortcutService.triggerStartShortcut()
         NotificationService.scheduleWorkComplete(at: endTime)
-        LiveActivityService.startWorkSession(endTime: endTime)
+        startLiveActivity(endTime: endTime, isBreak: false)
     }
 
     func startBreak() {
-        let endTime = Date().addingTimeInterval(Self.breakDuration)
+        sessionStartTime = Date()
+        let endTime = Date().addingTimeInterval(configuration.breakDuration)
         state = .onBreak(endTime: endTime)
-        remainingSeconds = Self.breakDuration
+        remainingSeconds = configuration.breakDuration
         startTimer(endTime: endTime)
 
         NotificationService.scheduleBreakComplete(at: endTime)
-        LiveActivityService.startBreakSession(endTime: endTime)
+        startLiveActivity(endTime: endTime, isBreak: true)
     }
 
     func startNewSession() {
@@ -64,15 +96,19 @@ final class TimerViewModel: ObservableObject {
     func reset() {
         stopTimer()
         state = .idle
-        remainingSeconds = Self.workDuration
+        remainingSeconds = configuration.workDuration
+        sessionStartTime = nil
 
         NotificationService.cancelAll()
-        LiveActivityService.stop()
+        stopLiveActivity()
     }
+
+    // MARK: - Private Timer Methods
 
     private func startTimer(endTime: Date) {
         stopTimer()
-        timerCancellable = Timer.publish(every: 0.1, on: .main, in: .common)
+        // Use 1Hz (1 second) updates - sufficient for timer display, saves battery
+        timerCancellable = Timer.publish(every: 1.0, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
                 Task { @MainActor in
@@ -97,6 +133,8 @@ final class TimerViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Completion Handling
+
     private func handleTimerCompletion() {
         triggerHapticFeedback()
         switch state {
@@ -110,16 +148,52 @@ final class TimerViewModel: ObservableObject {
     }
 
     private func workDidComplete() {
+        saveSession(type: .work)
         state = .workComplete
         ShortcutService.triggerEndShortcut()
-        LiveActivityService.stop()
+        stopLiveActivity()
     }
 
     private func breakDidComplete() {
+        saveSession(type: .breakTime)
         state = .idle
-        remainingSeconds = Self.workDuration
-        LiveActivityService.stop()
+        remainingSeconds = configuration.workDuration
+        stopLiveActivity()
     }
+
+    // MARK: - Session Tracking
+
+    private func saveSession(type: SessionType) {
+        guard let startTime = sessionStartTime else { return }
+        let session = PomodoroSession(
+            startTime: startTime,
+            endTime: Date(),
+            type: type,
+            completed: true
+        )
+        sessionRepository?.saveSession(session)
+        sessionStartTime = nil
+    }
+
+    // MARK: - Live Activity (iOS 16.1+)
+
+    private func startLiveActivity(endTime: Date, isBreak: Bool) {
+        if #available(iOS 16.1, *) {
+            if isBreak {
+                LiveActivityService.startBreakSession(endTime: endTime)
+            } else {
+                LiveActivityService.startWorkSession(endTime: endTime)
+            }
+        }
+    }
+
+    private func stopLiveActivity() {
+        if #available(iOS 16.1, *) {
+            LiveActivityService.stop()
+        }
+    }
+
+    // MARK: - Haptic Feedback
 
     private func triggerHapticFeedback() {
         let generator = UINotificationFeedbackGenerator()

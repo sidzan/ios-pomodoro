@@ -11,12 +11,52 @@ struct ContentView: View {
     @StateObject private var viewModel = TimerViewModel()
     @Environment(\.colorScheme) private var colorScheme
 
+    private var greeting: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12:
+            return "Good morning"
+        case 12..<17:
+            return "Good afternoon"
+        case 17..<21:
+            return "Good evening"
+        default:
+            return "Good night"
+        }
+    }
+
+    private var subtitle: String {
+        switch viewModel.state {
+        case .idle:
+            return "Ready to focus?"
+        case .working:
+            return "Stay focused! You got this."
+        case .onBreak:
+            return "Enjoy your break."
+        case .workComplete:
+            return "Great work! Take a break?"
+        }
+    }
+
     var body: some View {
         ZStack {
             PomodoroTheme.background(for: colorScheme)
                 .ignoresSafeArea()
 
-            VStack {
+            VStack(spacing: 0) {
+                // Greeting header
+                VStack(spacing: 4) {
+                    Text("\(greeting), Sijan")
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundColor(PomodoroTheme.text(for: colorScheme))
+
+                    Text(subtitle)
+                        .font(.system(size: 15))
+                        .foregroundColor(PomodoroTheme.text(for: colorScheme).opacity(0.5))
+                }
+                .multilineTextAlignment(.center)
+                .padding(.top, 60)
+
                 Spacer()
                 timerDisplay
                 Spacer()
